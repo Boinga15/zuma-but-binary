@@ -1,6 +1,8 @@
 from data import *
 
 import random
+import os
+import sys
 
 def generateQuestion(difficultyMinimum, difficultyMaximum):
     """
@@ -56,17 +58,18 @@ def generateQuestion(difficultyMinimum, difficultyMaximum):
         case 1:
             chosenCommand = random.choice(list(codes.keys()))
             useBinary = random.choice([True, False])
+            usingFunction = chosenCommand in usesFunction
 
             if useBinary:
                 binaryValue = bin(int(hex(codes[chosenCommand]), 16))[2:].zfill(6)
 
-                return [f"Convert the binary code \"0b{binaryValue}\" into its corresponding MIPS command in lowercase.", chosenCommand]
+                return [f"Convert the binary code \"0b{binaryValue}\" into its corresponding MIPS command in lowercase. " + ("Note that this binary code is used for the function parameter." if usingFunction else ""), chosenCommand]
             
             hexadecimal = hex(codes[chosenCommand]).upper()[2:]
             if len(hexadecimal) <= 1:
                 hexadecimal = "0" + hexadecimal
 
-            return [f"Convert the hexadecimal code \"0x{hexadecimal}\" into its corresponding MIPS command in lowercase.", chosenCommand]
+            return [f"Convert the hexadecimal code \"0x{hexadecimal}\" into its corresponding MIPS command in lowercase. " + ("Note that the binary code is used for the function parameter." if usingFunction else ""), chosenCommand]
 
 
         case 2:
@@ -162,8 +165,74 @@ def generateQuestion(difficultyMinimum, difficultyMaximum):
             return [f"Convert the binary line \"0b{binary}\" to its corresponding MIPS line, representing any numbers as its hexadecimal value.", command]
 
 
-print("")
+def neatPrint(text):
+    buffer = ""
 
-question = generateQuestion(0, 6)
-print(question[0])
-print("\nAnswer: " + question[1])
+    for character in text:
+        buffer += character
+
+        if len(buffer) >= 120 or (len(buffer) >= 80 and character == " "):
+            print(buffer)
+            buffer = ""
+    
+    if buffer != "":
+        print(buffer)
+
+
+class GameInstance:
+    def __init__(self):
+        self.points = 0
+        self.combo = 0
+
+        self.lives = 3
+        self.mistakesLeft = 5
+
+    def reset(self):
+        self.points = 0
+        self.combo = 0
+        self.lives = 3
+        self.mistakesLeft = 5
+
+    def startRound(self, floorName, minQuestions, maxQuestions, minDifficulty, maxDifficulty):
+        questionsLeft = random.choice(range(minQuestions, maxQuestions + 1))
+
+        while questionsLeft > 0:
+            os.system("cls")
+            print("----- " + floorName + " -----")
+            print(f"Lives Left: {self.lives}")
+            print(f"Points: {self.points}" + ("" if self.combo < 2 else f" (COMBO X{self.combo})") + "\n")
+
+            print(f"Questions Left: {questionsLeft}")
+
+            mistakeString = ""
+
+            for i in range(0, 5):
+                if i < (5 - self.mistakesLeft):
+                    mistakeString += "X "
+                else:
+                    mistakeString += "_ "
+            print("Mistakes Made: [ " + mistakeString[:-1] + " ]")
+            print("-------------------------------------------------")
+
+            question = generateQuestion(minDifficulty, maxDifficulty)
+            neatPrint(question[0])
+
+            answer = input("\n> ")
+
+            if answer == question[1]:
+                questionsLeft -= 1
+                
+                self.combo += 1
+                self.points += 100 + ((self.combo - 1) * 10)
+                
+            
+            else:
+                print("\nIncorrect answer. The correct answer was:")
+                print(question[1])
+
+                input("\nPress enter to continue...")
+                self.combo = 0
+                self.mistakesLeft -= 1
+
+game = GameInstance()
+game.startRound("Temple 1 - Floor 1", 15, 20, 0, 1)

@@ -46,6 +46,9 @@ codes = {
 }
 
 
+usesFunction = ["sll", "div", "divu", "srl", "slt", "sltu", "sra", "jr", "jalr", "mfhi", "mthi", "mflo", "mtlo", "mult", "multu", "add", "addu", "sub", "subu", "and", "or", "xor", "nor"]
+
+
 commandTypes = {
     "add": "R",
     "addi": "I",
