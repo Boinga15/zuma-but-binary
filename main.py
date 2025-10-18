@@ -187,6 +187,33 @@ class GameInstance:
         self.lives = 3
         self.mistakesLeft = 5
 
+        self.lastCompleted = 0
+        self.highscore = 0
+        self.highscoreStart = 0
+        self.highscoreEnd = 0
+    
+    def loadSave(self):
+        f = open("save.txt", "r")
+
+        data = []
+
+        for line in f.readlines():
+            data.append(int(line.strip()))
+        
+        self.lastCompleted = data[0]
+        self.highscore = data[1]
+        self.highscoreStart = data[2]
+        self.highscoreEnd = data[3]
+
+        f.close()
+
+    def saveGame(self):
+        f = open("save.txt", "w")
+
+        f.write(f"{self.lastCompleted}\n{self.highscore}\n{self.highscoreStart}\n{self.highscoreEnd}")
+
+        f.close()
+
     def reset(self):
         self.points = 0
         self.combo = 0
@@ -233,6 +260,181 @@ class GameInstance:
                 input("\nPress enter to continue...")
                 self.combo = 0
                 self.mistakesLeft -= 1
+            
+            if self.mistakesLeft <= 0:
+                return False
+        
+        return True
+    
+    def handleGame(self, levelID):
+        rounds = [
+            ["Zuga's Temple - Floor 1", 10, 15, 0, 0],
+            ["Zuga's Temple - Floor 2", 10, 15, 1, 1],
+            ["Zuga's Temple - Floor 3", 15, 20, 0, 1],
+            ["Mati's Temple - Floor 3", 12, 20, 2, 2],
+            ["Mati's Temple - Floor 3", 15, 20, 2, 3],
+            ["Mati's Temple - Floor 3", 20, 25, 2, 3],
+            ["Quarata's Temple - Floor 1", 15, 25, 4, 4],
+            ["Quarata's Temple - Floor 2", 20, 30, 2, 4],
+            ["Quarata's Temple - Floor 3", 25, 30, 0, 4],
+            ["Zuma's Temple - Floor 1", 20, 30, 5, 5],
+            ["Zuma's Temple - Floor 2", 30, 40, 3, 5],
+            ["Zuma's Temple - Floor 3", 50, 50, 0, 5],
+            ["The Final Barrier", 20, 20, 6, 6],
+            ["The Ultimate Test", 250, 250, 0, 6]
+        ]
+
+        startLevel = levelID + 1
+        currentLevel = levelID
+        self.reset()
+
+        gameActive = True
+
+        while gameActive:
+            round = rounds[currentLevel]
+
+            result = self.startRound(*round)
+            self.mistakesLeft = 5
+
+            if result:
+                os.system("cls")
+
+                print("LEVEL COMPLETE.")
+                print(round[0])
+                print(f"\nLives Left: {self.lives}")
+                print(f"Points: {self.points}")
+                input("\nPress enter to continue...")
+
+                currentLevel += 1
+                self.lives += 1
+                self.lastCompleted = max(self.lastCompleted, currentLevel)
+                self.saveGame()
+
+                if currentLevel >= 13:
+                    os.system("cls")
+
+                    self.points += self.lives * 25000
+
+                    print("YOU WIN!")
+                    print(f"Final Points: {self.points}")
+
+                    if self.points > self.highscore:
+                        print("\nNew highscore achieved!")
+
+                        self.highscore = self.points
+                        self.highscoreStart = startLevel
+                        self.highscoreEnd = currentLevel - 1
+                    
+                    else:
+                        print(f"\nPrevious highscore: {self.highscore} (achieved from \"{rounds[self.highscoreStart - 1][0]}\" to \"{rounds[self.highscoreEnd - 1][0]}\")")
+
+                    self.saveGame()
+                    input("\nPress enter to continue...")
+                    gameActive = False
+
+            else:
+                os.system("cls")
+                self.lives -= 1
+
+                if self.lives <= 0:
+                    print("GAME OVER.")
+                    print(f"Points: {self.points}")
+                    print(f"Final Level: {round[0]}")
+
+                    if self.points > self.highscore:
+                        print("\nNew highscore achieved!")
+
+                        self.highscore = self.points
+                        self.highscoreStart = startLevel
+                        self.highscoreEnd = currentLevel - 1
+                    
+                    else:
+                        print(f"\nPrevious highscore: {self.highscore} (achieved from \"{rounds[self.highscoreStart - 1][0]}\" to \"{rounds[self.highscoreEnd - 1][0]}\")")
+
+                    gameActive = False
+                    self.saveGame()
+
+                else:
+                    print("LIFE LOST.")
+                    print(round[0])
+                    print(f"\nLives Left: {self.lives}")
+                    print(f"Points: {self.points}")
+                
+                input("\nPress enter to continue...")
+
+        os.system("cls")
+
+    def play(self):
+        isDone = False
+        os.system("cls")
+
+        while not isDone:
+            print("Select a level, if you dare...")
+
+            choices = [
+                ["Zuga's Temple - Floor 1"],
+                ["Zuga's Temple - Floor 2"],
+                ["Zuga's Temple - Floor 3"],
+                ["Mati's Temple - Floor 1"],
+                ["Mati's Temple - Floor 2"],
+                ["Mati's Temple - Floor 3"],
+                ["Quarata's Temple - Floor 1"],
+                ["Quarata's Temple - Floor 2"],
+                ["Quarata's Temple - Floor 3"],
+                ["Zuma's Temple - Floor 1"],
+                ["Zuma's Temple - Floor 2"],
+                ["Zuma's Temple - Floor 3"],
+                ["The Final Barrier"],
+                ["The Ultimate Test"]
+            ]
+
+            for (i, choice) in enumerate(choices):
+                if i <= self.lastCompleted:
+                    print(f"{i + 1}: {choice[0]}")
+            
+            print(f"\n{len(choices) + 1}: Back.")
+
+            op = input("\n> ")
+            os.system("cls")
+
+            if op == str(len(choices) + 1):
+                isDone = True
+            
+            elif op.isnumeric() and int(op) >= 1 and int(op) <= (self.lastCompleted + 1):
+                self.handleGame(int(op) - 1)
+
+            else:
+                print("Invalid choice, please try again.\n")
+
+
+    def mainMenu(self):
+        isDone = False
+        os.system("cls")
+
+        self.loadSave()
+
+        while not isDone:
+            print("ZUMA BUT BINARY")
+            print("An unecessary complicated way to learn MIPS binary.\n")
+            print("1: Play")
+            print("2: Practice")
+            print("3: Quit")
+
+            op = input("\n> ")
+            os.system("cls")
+
+            match op:
+                case "1":
+                    self.play()
+
+                case "2":
+                    pass
+
+                case "3":
+                    isDone = True
+
+                case _:
+                    print("Error: Invalid input, please try again.\n")
 
 game = GameInstance()
-game.startRound("Temple 1 - Floor 1", 15, 20, 0, 1)
+game.mainMenu()
