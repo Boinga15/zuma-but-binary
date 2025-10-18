@@ -4,7 +4,7 @@ import random
 import os
 import sys
 
-def generateQuestion(difficultyMinimum, difficultyMaximum):
+def generateQuestion(difficultyMinimum, difficultyMaximum, allowedCommands):
     """
     The difficulty of a question determines what kind of question could be asked.
     0: Convert command to corresponding hexadecimal or binary.
@@ -40,7 +40,7 @@ def generateQuestion(difficultyMinimum, difficultyMaximum):
 
     match chosenDifficulty:
         case 0:
-            chosenCommand = random.choice(list(codes.keys()))
+            chosenCommand = random.choice(allowedCommands)
             useBinary = random.choice([True, False])
 
             if useBinary:
@@ -56,7 +56,7 @@ def generateQuestion(difficultyMinimum, difficultyMaximum):
 
 
         case 1:
-            chosenCommand = random.choice(list(codes.keys()))
+            chosenCommand = random.choice(allowedCommands)
             useBinary = random.choice([True, False])
             usingFunction = chosenCommand in usesFunction
 
@@ -73,14 +73,14 @@ def generateQuestion(difficultyMinimum, difficultyMaximum):
 
 
         case 2:
-            chosenCommand = random.choice(list(codes.keys()))
+            chosenCommand = random.choice(allowedCommands)
             structure = commandTypes[chosenCommand]
 
             return [f"Give the correct type of structure the command \"{chosenCommand}\" uses (R, I, or J).", structure]
 
 
         case 3:
-            chosenStructure = random.choice(list(structures.keys()))
+            chosenStructure = random.choice(allowedCommands)
             chosenSection = random.choice(structures[chosenStructure])
             giveSize = random.choice([False, True])
 
@@ -92,7 +92,7 @@ def generateQuestion(difficultyMinimum, difficultyMaximum):
 
 
         case 4:
-            chosenStructure = random.choice(list(structures.keys()))
+            chosenStructure = random.choice(allowedCommands)
             giveSize = random.choice([True, False])
 
             if giveSize:
@@ -112,7 +112,7 @@ def generateQuestion(difficultyMinimum, difficultyMaximum):
 
 
         case 5:
-            chosenCommand = random.choice(list(codes.keys()))
+            chosenCommand = random.choice(allowedCommands)
             print(chosenCommand)
             template = templates[chosenCommand]
 
@@ -139,7 +139,7 @@ def generateQuestion(difficultyMinimum, difficultyMaximum):
             return [f"Give the binary representation of the command \"{command}\", where all of the numbers are represented in hexadecimal.", binary]
 
         case 6:
-            chosenCommand = random.choice(list(codes.keys()))
+            chosenCommand = random.choice(allowedCommands)
             template = templates[chosenCommand]
 
             binaryCommandKey = bin(int(hex(codes[chosenCommand]), 16))[2:].zfill(6)
@@ -241,7 +241,7 @@ class GameInstance:
             print("Mistakes Made: [ " + mistakeString[:-1] + " ]")
             print("-------------------------------------------------")
 
-            question = generateQuestion(minDifficulty, maxDifficulty)
+            question = generateQuestion(minDifficulty, maxDifficulty, list(codes.keys()))
             neatPrint(question[0])
 
             answer = input("\n> ")
