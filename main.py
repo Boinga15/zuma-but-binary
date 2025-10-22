@@ -113,7 +113,6 @@ def generateQuestion(difficultyMinimum, difficultyMaximum, allowedCommands):
 
         case 5:
             chosenCommand = random.choice(allowedCommands)
-            print(chosenCommand)
             template = templates[chosenCommand]
 
             binaryCommandKey = bin(int(hex(codes[chosenCommand]), 16))[2:].zfill(6)
@@ -407,6 +406,126 @@ class GameInstance:
                 print("Invalid choice, please try again.\n")
 
 
+    def practice(self):
+        chosenCommands = []
+        availableCommands = list(codes.keys())
+        isDone = False
+
+        os.system("cls")
+        while not isDone:
+            print("Select which commands you wish to be tested on:\n")
+            
+            for (i, command) in enumerate(availableCommands):
+                print(f"{i + 1}: {command}" + (" [X]" if command in chosenCommands else " [ ]"))
+            
+            print(f"\n{len(availableCommands) + 1}: Continue")
+            print(f"{len(availableCommands) + 2}: Back to main menu")
+
+            op = input("\n> ")
+            os.system("cls")
+
+            if op == f"{len(availableCommands) + 1}":
+                if len(chosenCommands) > 0:
+                    isDone = True
+                
+                else:
+                    print("Error: You need to select at least one command to be tested on.\n")
+            
+            elif op == f"{len(availableCommands) + 2}":
+                return
+
+            elif op.isnumeric() and (0 < int(op) < len(availableCommands) + 1):
+                choice = int(op) - 1
+
+                if availableCommands[choice] in chosenCommands:
+                    chosenCommands.remove(availableCommands[choice])
+                
+                else:
+                    chosenCommands.append(availableCommands[choice])
+            
+            else:
+                print("Error: Invalid choice, please try again.\n")
+        
+        isDone = False
+        difficulty = -1
+
+        os.system("cls")
+        while not isDone:
+            choices = [
+                "Convert the given command to its corresponding hexadecimal or binary.",
+                "Convert a hexadecimal or binary number to its corresponding command.",
+                "Given a command, give its structure.",
+                "Given a section of a structure, give that section's size or name.",
+                "Given a structure, enter all of its sections' sizes or names.",
+                "Given a full command, translate it to its corresponding binary form.",
+                "Given a binary command, translate it to its corresponding MIPS command."
+            ]
+
+            print("Enter which category of questions you wish to be tested on:")
+
+            for (i, choice) in enumerate(choices):
+                print(f"{i + 1}: {choice}")
+            
+            print(f"{len(choices) + 1}: Back to main menu")
+
+            op = input("\n> ")
+            os.system("cls")
+
+            if op == f"{len(choices) + 1}":
+                return
+            
+            elif op.isnumeric and (0 < int(op) < len(choices) + 1):
+                difficulty = int(op) - 1
+                isDone = True
+
+            else:
+                print("Error: Invalid choice, please try again.\n")
+        
+        points = 0
+        combo = 0
+        highestCombo = 0
+        mistakes = 0
+        questionsAnswered = 0
+
+        while True:
+            os.system("cls")
+            print("----- PRACTICE -----")
+            print(f"Points: {points}" + ("" if combo < 2 else f" (COMBO X{combo})"))
+            print(f"Highest Combo: {highestCombo}\n")
+            print(f"Question: {questionsAnswered + 1}")
+
+            if questionsAnswered > 0:
+                print(f"Correct Ratio: {round(1 - (mistakes / questionsAnswered), 4) * 100}")
+            print("-------------------------------------------------")
+
+            question = generateQuestion(difficulty, difficulty, chosenCommands)
+            neatPrint(question[0])
+            print("\nEnter \"EXIT\" to finish.")
+
+            answer = input("\n> ")
+
+            if answer == question[1]:
+                combo += 1
+                points += 100 + ((self.combo - 1) * 10)
+
+                if combo > highestCombo:
+                    highestCombo = combo
+            
+
+            elif answer == "EXIT":
+                return
+                
+            
+            else:
+                print("\nIncorrect answer. The correct answer was:")
+                print(question[1])
+
+                input("\nPress enter to continue...")
+                combo = 0
+                mistakes += 1
+            
+            questionsAnswered += 1
+
     def mainMenu(self):
         isDone = False
         os.system("cls")
@@ -428,7 +547,7 @@ class GameInstance:
                     self.play()
 
                 case "2":
-                    pass
+                    self.practice()
 
                 case "3":
                     isDone = True
