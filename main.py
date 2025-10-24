@@ -2,7 +2,6 @@ from data import *
 
 import random
 import os
-import sys
 
 def generateQuestion(difficultyMinimum, difficultyMaximum, allowedCommands):
     """
@@ -163,7 +162,7 @@ def generateQuestion(difficultyMinimum, difficultyMaximum, allowedCommands):
 
             return [f"Convert the binary line \"0b{binary}\" to its corresponding MIPS line, representing any numbers as its hexadecimal value.", command]
 
-
+# Helper function - prints a given string with adequate line-breaks.
 def neatPrint(text):
     buffer = ""
 
@@ -213,6 +212,7 @@ class GameInstance:
 
         f.close()
 
+    # Called before the start of any round.
     def reset(self):
         self.points = 0
         self.combo = 0
@@ -245,14 +245,14 @@ class GameInstance:
 
             answer = input("\n> ")
 
-            if answer == question[1]:
+            if answer == question[1]: # Question correct.
                 questionsLeft -= 1
                 
                 self.combo += 1
                 self.points += 100 + ((self.combo - 1) * 10)
                 
             
-            else:
+            else: # Question incorrect.
                 print("\nIncorrect answer. The correct answer was:")
                 print(question[1])
 
@@ -265,7 +265,9 @@ class GameInstance:
         
         return True
     
+    # Called when the player selects a level.
     def handleGame(self, levelID):
+        # Name, Minimum Questions, Maximum Questions, Minimum Difficulty, Maximum Difficulty
         rounds = [
             ["Zuga's Temple - Floor 1", 10, 15, 0, 0],
             ["Zuga's Temple - Floor 2", 10, 15, 1, 1],
@@ -362,7 +364,7 @@ class GameInstance:
                 input("\nPress enter to continue...")
 
         os.system("cls")
-
+    
     def play(self):
         isDone = False
         os.system("cls")
@@ -370,6 +372,7 @@ class GameInstance:
         while not isDone:
             print("Select a level, if you dare...")
 
+            # Names of the different floors.
             choices = [
                 ["Zuga's Temple - Floor 1"],
                 ["Zuga's Temple - Floor 2"],
